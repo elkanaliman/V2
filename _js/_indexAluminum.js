@@ -11,7 +11,7 @@ export function loadAluminumWall(scene, object) {
   // Return a promise to ensure the loaded object is accessible
   return new Promise((resolve, reject) => {
     wallLoader.load(
-      "models/_features/_walls/_solidAluminiumWalls.gltf",
+      "_models/_features/_walls/_solidAluminiumWalls.gltf",
       (gltf) => {
         const _solidAluminiumWalls = gltf.scene;
 

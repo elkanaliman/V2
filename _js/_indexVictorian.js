@@ -9,7 +9,7 @@ export function loadVictorianLamp(scene, object) {
   const lampLoader = new GLTFLoader();
 
   // Load the Victorian Lamp model
-  lampLoader.load('models/_features/_lights/_victorian/scene.gltf', (gltf) => {
+  lampLoader.load('_models/_features/_lights/_victorian/scene.gltf', (gltf) => {
     _victorianLampModel = gltf.scene;
 
     // Set the position of the Victorian Lamp inside the pergola

@@ -9,7 +9,7 @@ export function loadRetractingLouvredWalls(scene, object) {
   // Return a promise to ensure the loaded object is accessible
   return new Promise((resolve, reject) => {
     wallLoader.load(
-      "models/_features/_walls/_retractingLouvredWalls.gltf",
+      "_models/_features/_walls/_retractingLouvredWalls.gltf",
       (gltf) => {
         const _retractingLouvredWalls = gltf.scene;
 

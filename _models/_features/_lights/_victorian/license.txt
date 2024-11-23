@@ -1,0 +1,11 @@
+Model Information:
+* title:	Victorian Street Lamp
+* source:	https://sketchfab.com/3d-models/victorian-street-lamp-b7cebcfb4b1c4d4a97e22072800704ca
+* author:	Discover (https://sketchfab.com/Discovered)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Victorian Street Lamp" (https://sketchfab.com/3d-models/victorian-street-lamp-b7cebcfb4b1c4d4a97e22072800704ca) by Discover (https://sketchfab.com/Discovered) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

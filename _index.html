@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Configurator</title>
+    <link rel="stylesheet" href="_css/_index.css">
+    <script defer type="module" src="_js/_index.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <!-- Live Reload script for hot reloading during development -->
+    <script src="http://localhost:35729/livereload.js"></script> <!-- Assuming you have a live server with LiveReload enabled -->
+</head>
+
+<body>
+    <main>
+        <div id="container3D"></div>
+
+        <!-- Light Toggle Button -->
+        <button id="_lightToggleButton" class="light-button">
+            <i class="fas fa-lightbulb"></i>
+        </button>
+
+        <div id="sidebar">
+            <h2>Select Canopy Type</h2>
+            <select id="_canopyTypeSelect">
+                <option value="" disabled selected>Select Canopy Type</option>
+                <option value="_wallMounted">Wall Mounted Canopy</option>
+                <option value="_freeStanding">Free Standing Canopy</option>
+            </select>
+
+            <h2>Customizable Features</h2>
+            <select id="_roofFeatureSelect">
+                <option value="" disabled selected>Select Roof Type</option>
+                <option value="_louvred">Louvred Roof</option>
+                <option value="_glassRoof">Glass Roof</option>
+                <option value="_plasticRoof">Plastic Roof</option>
+                <option value="_retractingLouvredRoof">Retracting Louvred Roof</option>
+            </select>
+
+            <h2>Wall and Doors Features</h2>
+            <select id="_wallFeatureSelect">
+                <option value="" disabled selected>Select Wall Type</option>
+                <option value="_solidAluminiumWalls">Aluminium Wall</option>
+                <option value="_louvredWalls">Louvred Walls</option>
+                <option value="_retractingLouvredWalls">Open/Close Louvred Walls</option>
+            </select>
+
+            
+            <select id="_doorFeatureSelect">
+                <option value="" disabled selected>Select Door Type</option>
+                <option value="_slidingGlassDoors">Sliding Glass Doors (Frameless)</option>
+                <option value="_pullDownBlinds">Pull Down Blinds</option>
+            </select>
+
+            <h2>Aesthtic Enhancements</h2>
+
+            <select id="_colorFeatureSelect">
+                <option value="" disabled selected>Select Color</option>
+                <option value="_white">White</option>
+                <option value="_grey">Grey</option>
+            </select>
+
+            <select id="_victorianStyle">
+                <option value="" disabled selected>Select Style</option>
+                <option value="_victorian">Victorian Style</option>
+            </select>
+
+            <!-- Price Display -->
+            <div id="priceDisplay" class="price-display">Total Price: €0</div>
+
+            <!-- Get Quotation Button -->
+            <button id="quotationButton" class="scene-button">Get Quotation</button>
+        </div>
+    </main>
+
+    <!-- CSS Styles for the Lights Button on the Scene -->
+    <style>
+        .scene-button {
+            position: relative;
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #FFD580;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .scene-button:hover {
+            background-color: #FFC107;
+            transform: scale(1.05);
+        }
+
+        .scene-button:active {
+            transform: scale(0.95);
+        }
+
+        .price-display {
+            font-size: 1.5em;
+            color: #00ff6a;
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            background: #333333;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.3);
+        }
+    </style>
+</body>
+
+</html>

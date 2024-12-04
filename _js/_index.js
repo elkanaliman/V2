@@ -4,13 +4,59 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
 // To allow for importing the .gltf file
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
+
+
 import { loadAluminumWall } from './_indexAluminum.js';
-import { loadStaticLouvredWalls } from './_indexStaticLouvred.js';
 import { loadRetractingLouvredWalls } from './_indexRetractingLouvred.js';
-import { loadVictorianLamp } from './_indexVictorian.js';
-import { loadLightLamp } from './_indexLights.js';
-import { loadGlassDoor } from './_indexGlassDoors.js';
-import { loadPullDownBlinds } from './_indexPullDownBlinds.js';
+import { loadStaticLouvredWalls } from './_indexStaticLouvred.js';
+import { loadSofa } from "./_indexLoadSofa.js";
+import { loadGlassWalls } from "./_indexGlassWalls.js";
+
+const canopyTypeSelect = document.getElementById('_canopyTypeSelect');
+
+
+
+
+const frontSideSelect = document.getElementById('_frontSide');
+
+
+const side1Select = document.getElementById('_side1');
+
+const side2Select = document.getElementById('_side2');
+
+
+const backsideSelect = document.getElementById('_backside');
+
+
+
+
+
+// Event Listeners for Progressive Display
+canopyTypeSelect.addEventListener('change', function () {
+
+
+    if (canopyTypeSelect.value === "_wallMounted") {
+      // Show only Front, Side 1, and Side 2 for wall-mounted canopies
+
+      frontSideSelect.style.display = 'block';
+    side1Select.style.display = 'block';
+    side2Select.style.display = 'none';
+    backsideSelect.style.display = 'block';
+  } else if (canopyTypeSelect.value === "_freeStanding") {
+      // Show all four sides for free-standing canopies
+  
+      frontSideSelect.style.display = 'block';
+
+      side1Select.style.display = 'block';
+
+      side2Select.style.display = 'block';
+
+      backsideSelect.style.display = 'block';
+  }
+});
+
+
+
 
 // Get the container dimensions for the 3D canvas
 const container = document.getElementById("container3D");
@@ -19,11 +65,11 @@ let height = container.clientHeight;
 
 // Create a Three.JS Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x6FA8DC);
+scene.background = new THREE.Color(0xC0C0C0);
 
 // Create a new camera with positions and angles
-const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-camera.position.set(10, 5, 20);
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 2000); // Decreased FOV for a better perspective
+camera.position.set(100, 150, 200); // Set the camera far away initially to see everything better
 
 // Instantiate a new renderer and set its size
 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -39,30 +85,24 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // Smoother camera motion
 controls.dampingFactor = 0.1;
 controls.maxPolarAngle = Math.PI / 2; // Restrict the camera's vertical movement
+controls.minDistance = 10; // Allow closer zoom in
+controls.maxDistance = 1500; // Increased maximum zoom distance to allow full zoom out
 
-// Load a marble texture for the floor to make it human-like and elegant
-
+// Load a marble texture for the floor
 const textureLoader = new THREE.TextureLoader();
-const floorTexture = textureLoader.load('_models/_features/_textures/_floor/_pavement.jpg'); 
+const floorTexture = textureLoader.load('_models/_features/_textures/_floor/_pavement.jpg');
 
 // Repeat the texture to simulate tiles
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set(15, 15); // Adjust repetition based on desired tile size
-
-
-
-// Repeat the texture to simulate tiles
-floorTexture.wrapS = THREE.RepeatWrapping;
-floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set(15, 15); // Increase the repetition to make it look like smaller, elegant tiles
+//floorTexture.repeat.set(3, 3); // Increase the repetition to make it look like smaller, elegant tiles
 
 // Create a plane to serve as the floor
-const floorGeometry = new THREE.PlaneGeometry(1000, 1000);
+const floorGeometry = new THREE.PlaneGeometry(800, 800);
 const floorMaterial = new THREE.MeshStandardMaterial({
-  map: floorTexture,       // Apply the marble tiled texture
-  roughness: 0.1,  // Lower roughness for a glossy effect
-  metalness: 0.4,  // Increase metalness for a slight reflection
+   // map: floorTexture, // Apply the marble tiled texture
+    roughness: 1, // Lower roughness for a glossy effect
+    metalness: .1, // Increase metalness for a slight reflection
 });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
@@ -71,71 +111,102 @@ floor.receiveShadow = true;
 scene.add(floor);
 
 // Set which object to render
-let object, rafterLightsArray = [], _glassRoof, _louvres, _plasticRoof, _retractingLouvredRoof, _slidingGlassDoors, _pullDownBlinds;
-
-// Instantiate a loader for the .gltf file
+let object, _glassRoof, _louvres, _plasticRoof, _retractingLouvredRoof, _glassDoor;
 const loader = new GLTFLoader();
 
+
+function disposeObject(obj) {
+  obj.traverse((node) => {
+      if (!node.isMesh) return;
+
+      if (node.geometry) {
+          node.geometry.dispose();
+      }
+
+      if (node.material) {
+          if (Array.isArray(node.material)) {
+              // Dispose of multi-materials
+              node.material.forEach((material) => disposeMaterial(material));
+          } else {
+              disposeMaterial(node.material);
+          }
+      }
+  });
+}
+
 // Function to load a model
-
-
 function loadModel(url) {
-  // If an object is already loaded, remove it before loading a new one
-  if (object) {
-    scene.remove(object);
-    // Remove all existing rafter lights if they exist
-    rafterLightsArray.forEach(light => scene.remove(light));
-    rafterLightsArray = [];
+
+    if (object) {
+      scene.remove(object);
+      disposeObject(object); // Dispose of geometries and materials to avoid memory leaks
+      object = null;
   }
 
-  loader.load(
-    url,
-    function (gltf) {
-      object = gltf.scene;
+    loader.load(
+        url,
+        function (gltf) {
+            object = gltf.scene;
 
-      // Enable casting and receiving shadows for the loaded object
-      object.traverse(function (node) {
-        if (node.isMesh) {
-          node.castShadow = true; // Object will cast a shadow
-          node.receiveShadow = true; // Object will receive shadows
+            // Enable casting and receiving shadows for the loaded object
+            object.traverse(function (node) {
+                if (node.isMesh) {
+                  color: 0x272727,
+                    node.castShadow = true; // Object will cast a shadow
+                    node.receiveShadow = true; // Object will receive shadows
+                }
+            });
+
+
+
+            // Add the object to the scene
+            scene.add(object);
+
+            // Adjust camera to fit the object
+            adjustCameraToFitObject(object);
+
+            
+
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        function (error) {
+            console.error(error);
         }
-      });
+    );
+}
 
-      // Add the object to the scene
-      scene.add(object);
+function adjustCameraToFitObject(object) {
+    // Calculate the bounding box of the object
+    const box = new THREE.Box3().setFromObject(object);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
 
-      // Calculate the bounding box of the object
-      const box = new THREE.Box3().setFromObject(object);
-      const size = new THREE.Vector3();
-      box.getSize(size);
+    // Set the camera's distance and orientation to give a full view
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = camera.fov * (Math.PI / 180); // Convert FOV to radians
+    let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)));
 
-      // Calculate the optimal camera distance based on the model's size
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const fov = camera.fov * (Math.PI / 180); // Convert FOV to radians
-      let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)));
-
-      // Set an offset so the model is not touching the camera
-      cameraZ *= 1.5;
-
-      // Set the camera position accordingly
-      camera.position.set(0, size.y / 2, cameraZ);
-      controls.target.set(0, size.y / 2, 0);
-      controls.update();
-
-      // Create lights along the rafters after the model is loaded
-      //createRafterLights(size);
-    },
-    function (xhr) {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    function (error) {
-      console.error(error);
-    }
-  );
+    cameraZ *= 2.5; // Increase distance for a better overall view
+    camera.position.set(center.x + cameraZ, center.y + cameraZ, cameraZ);
+    camera.lookAt(center);
+    controls.target.copy(center);
+    controls.update();
 }
 
 // Load the wall-mounted canopy model initially
-loadModel('_models/A/_modelA.gltf');
+loadModel('_models/A/_modelBGrey.gltf');
+loadSofa(scene, loader);
+
+
+
+
+
+
+
 
 // Event listener for selecting canopy types
 let canopyObject = null;
@@ -143,72 +214,120 @@ document.getElementById("_canopyTypeSelect").addEventListener("change", (event) 
   const wallLoader = new GLTFLoader();
 
   if (event.target.value === "_wallMounted") {
+
+          // Remove existing object if needed
+          if (object) {
+            scene.remove(object);
+          }
     wallLoader.load('_models/A/_modelBGrey.gltf', (gltf) => {
-      const _modelBGrey = gltf.scene;
+      const _wallMounted = gltf.scene;
 
       // Traverse and update materials
-      _modelBGrey.traverse((node) => {
+      _wallMounted.traverse((node) => {
         if (node.isMesh) {
           node.material = new THREE.MeshStandardMaterial({
-            color: 0x000000,           // Set the base color to grey
-            roughness: 0.5,            // Reduce roughness to make it even smoother
-            metalness: 0.8,            // Increase metalness slightly for more reflection
-            opacity: 0.3,              // Reduce opacity to make it look more transparent
-            side: THREE.DoubleSide,    // Render both sides
-            depthWrite: true,          // Write depth for accurate overlapping
-            depthTest: true,           // Enable depth testing for proper scene layering
-            envMapIntensity: 0.7       // Add environmental reflection
+            color: 0xADD8E6,  // Lighter brown base color
+
+            side: THREE.DoubleSide,
+            depthWrite: true,
+            depthTest: true
           });
           node.castShadow = true;
           node.receiveShadow = true;
         }
       });
 
-      // Remove existing object if needed
-      if (object) {
-        scene.remove(object);
-      }
+      loadSofa(scene, object);
+
+
 
       // Add the updated model to the scene
-      scene.add(_modelBGrey);
-      canopyObject = _modelBGrey;  // Track the current canopy object for further removal
+      scene.add(_wallMounted);
+      canopyObject = _wallMounted;  // Track the current canopy object for further removal
     });
 
   } else if (event.target.value === "_freeStanding") {
-    wallLoader.load('_models/A/_modelA.gltf', (gltf) => {
-      const _modelA = gltf.scene;
 
-      // Traverse and update materials
-      _modelA.traverse((node) => {
+    if (object) {
+      scene.remove(object);
+      
+    }
+
+    wallLoader.load('_models/A/_modelA.gltf', (gltf) => {
+      const _freeStandingCanopy = gltf.scene;
+
+      // materials color and how it look at the event start
+      _freeStandingCanopy.traverse((node) => {
         if (node.isMesh) {
           node.material = new THREE.MeshStandardMaterial({
-            color: 0x777777,           // Set the base color to grey
-            roughness: 0.5,            // Reduce roughness to make it even smoother
-            metalness: 0.8,            // Increase metalness slightly for more reflection
-            opacity: 0.3,              // Reduce opacity to make it look more transparent
-            side: THREE.DoubleSide,    // Render both sides
-            depthWrite: true,          // Write depth for accurate overlapping
-            depthTest: true,           // Enable depth testing for proper scene layering
-            envMapIntensity: 0.7       // Add environmental reflection
+            color: 0xADD8E6,  
+
+            side: THREE.DoubleSide,
+            depthWrite: true,
+            depthTest: true
+
+      
           });
           node.castShadow = true;
           node.receiveShadow = true;
         }
       });
 
-      // Remove existing object if needed
-      if (object) {
-        scene.remove(object);
-      }
+
 
       // Add the updated model to the scene
-      scene.add(_modelA);
-      canopyObject = _modelA; 
+      scene.add(_freeStandingCanopy);
+      canopyObject = _freeStandingCanopy; 
+
     });
+    canopyObject = null;
   }
 });
 
+ const _lengthSelect = document.getElementById('lengthInput');
+ const _widthSelect = document.getElementById('widthInput');
+
+
+ _lengthSelect.addEventListener('change', updateModel);
+ _widthSelect.addEventListener('change', updateModel);
+
+ const _pergolaLength1 = parseInt(_lengthSelect.value);
+ const _pergolaWidth1 = parseInt(_widthSelect.value); 
+
+ const _added = _pergolaLength1 + _pergolaWidth1;
+ console.log('Total is', _added);
+
+   function updateModel() {
+         const _pergolaLength = parseInt(_lengthSelect.value) || 1; // Default to 1 if invalid
+         const _pergolaWidth = parseInt(_widthSelect.value) || 1; // Default to 1 if invalid
+
+       // Update the canopy scale
+       if (canopyObject) {
+         canopyObject.scale.set(_pergolaLength, 1, _pergolaWidth);
+       }
+
+       // Update the roof scale
+       if (_louvres) {
+         updateRoofDimensions(_louvres, _pergolaLength, _pergolaWidth);
+       }
+       if (_glassRoof) {
+         updateRoofDimensions( _glassRoof,_pergolaLength, _pergolaWidth);
+       }
+       if (_plasticRoof) {
+        updateRoofDimensions( _plasticRoof,_pergolaLength, _pergolaWidth);
+      }if (_retractingLouvredRoof) {
+        updateRoofDimensions( _retractingLouvredRoof,_pergolaLength, _pergolaWidth);
+      } 
+
+
+       console.log(`Updated to Length: ${_pergolaLength}, Width: ${_pergolaWidth}`);
+    
+   }
+
+
+
 document.getElementById("_colorFeatureSelect").addEventListener("change", (event) => {
+  const floorTexture = textureLoader.load('_models/_features/_textures/_assets/Wood.jpg');
   const selectedColor = event.target.value;
 
   if (canopyObject) {
@@ -217,18 +336,61 @@ document.getElementById("_colorFeatureSelect").addEventListener("change", (event
         // Set color based on the selected option
         switch (selectedColor) {
           case "_white":
-            node.material.color.set(0xffffff); // Set to white color
+            
+            node.material = new THREE.MeshStandardMaterial({
+              color: 0xB6B6B6,           //         color: 0xce8141,  // Lighter brown base color
+
+        
+            });
             break;
           case "_grey":
-            node.material.color.set(0x777777); // Set to grey color
+            node.material = new THREE.MeshStandardMaterial({
+              color: 0x504A4B,           // Set the base color to Nero
+              metalness: .1,            // Increase metalness slightly for more reflection
+              side: THREE.DoubleSide,    // Render both sides
+              depthWrite: true,          // Write depth for accurate overlapping
+              depthTest: true,           // Enable depth testing for proper scene layering
+        
+            });
             break;
+           
         }
       }
     });
   }
 });
 
-// Event listener for selecting roof types
+
+
+
+function updateRoofDimensions(_featureRoof) {
+
+  const _updatedRoofLength = parseInt(_lengthSelect.value) || 1; // Default to 1 if invalid
+  const _updatedRoofWidth = parseInt(_widthSelect.value) || 1;
+  if (_louvres) {
+    _featureRoof.scale.set(_updatedRoofLength, 1, _updatedRoofWidth); // Adjust length (X), width (Z), keep height (Y)
+    console.log(`Roof updated to length: ${_updatedRoofLength}, width: ${_updatedRoofWidth}`);
+  } if (_glassRoof) {
+    _featureRoof.scale.set(_updatedRoofLength, 1, _updatedRoofWidth); // Adjust length (X), width (Z), keep height (Y)
+    console.log(`Roof updated to length: ${_updatedRoofLength}, width: ${_updatedRoofWidth}`);
+  }if (_plasticRoof) {
+    _featureRoof.scale.set(_updatedRoofLength, 1, _updatedRoofWidth); // Adjust length (X), width (Z), keep height (Y)
+    console.log(`Roof updated to length: ${_updatedRoofLength}, width: ${_updatedRoofWidth}`);
+  }if (_retractingLouvredRoof) {
+    _featureRoof.scale.set(_updatedRoofLength, 1, _updatedRoofWidth); // Adjust length (X), width (Z), keep height (Y)
+    console.log(`Roof updated to length: ${_updatedRoofLength}, width: ${_updatedRoofWidth}`);
+  }
+  
+  else {
+    console.error('Roof object is not yet loaded or defined.');
+  }
+
+  scene.add(_featureRoof);
+}
+
+
+
+
 document.getElementById("_roofFeatureSelect").addEventListener("change", (event) => {
   const roofLoader = new GLTFLoader();
 
@@ -257,8 +419,9 @@ document.getElementById("_roofFeatureSelect").addEventListener("change", (event)
             });
           }
         });
-    
-        addFeatureToScene(_louvres);
+        updateRoofDimensions(_louvres);
+        scene.add(_louvres);
+        
       });
     break;
       case "_glassRoof":
@@ -270,16 +433,17 @@ document.getElementById("_roofFeatureSelect").addEventListener("change", (event)
               node.material = new THREE.MeshStandardMaterial({
                 color: 0xffffff, // White color for the glass roof
                 transparent: true, // Enable transparency
-                opacity: 0.5, // Set the opacity level (0 is fully transparent, 1 is opaque)
-                roughness: 0.1, // Make the glass relatively smooth
-                metalness: 0.3, // Add a slight metallic feel
+                opacity: 1, // Set the opacity to 1 for a fully reflective surface
+                metalness: 1, // High metalness for a mirror-like appearance
+                roughness: 0.1, // Low roughness for a smooth surface
                 side: THREE.DoubleSide // Render both sides of the glass
               });
               node.castShadow = true; // Allow the roof to cast shadows
               node.receiveShadow = true; // Allow the roof to receive shadows
             }
           });
-          addFeatureToScene(_glassRoof);
+          updateRoofDimensions(_glassRoof);
+          scene.add(_glassRoof);
         });
         break;
       break;
@@ -301,7 +465,8 @@ document.getElementById("_roofFeatureSelect").addEventListener("change", (event)
               node.receiveShadow = true; // Allow the roof to receive shadows
             }
           });
-          addFeatureToScene(_plasticRoof);
+          updateRoofDimensions(_plasticRoof);
+          scene.add(_plasticRoof);
         });
         break;
 
@@ -324,119 +489,220 @@ document.getElementById("_roofFeatureSelect").addEventListener("change", (event)
               node.receiveShadow = true; // Allow the roof to receive shadows
             }
           });
-          addFeatureToScene(_retractingLouvredRoof);
+          updateRoofDimensions(_retractingLouvredRoof);
+          scene.add(_retractingLouvredRoof);
         });
         break;
   }
 });
 
-// Event listener for selecting wall types
-
-let _currentWall = null; // Track the current wall group in the scene
-
-document.getElementById("_wallFeatureSelect").addEventListener("change", async (event) => {
 
 
-  // Check if there is a wall currently loaded
-  if (_currentWall) {
-    // Remove current wall from the scene
-    scene.remove(_currentWall);
 
-    // Dispose of geometry and material to free memory
-    _currentWall.traverse((node) => {
-      if (node.isMesh) {
-        node.geometry.dispose();
-        node.material.dispose();
+
+
+
+async function handleSideSelection(selectElement, sideName) {
+  selectElement.addEventListener("change", async function () {
+    if (selectElement.value === "_aluminiumWall") {
+      let position, scale, rotation;
+
+      switch (sideName) {
+        case "Side 1":
+          position = { x: 4, y: 0, z: 4 };
+          scale = { x: 1.01, y: 1, z: 1 };
+          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
+          break;
+
+        case "Side 2":
+           //position = { x: -550, y: 0, z: 4 };
+           //scale = { x: 0.84, y: 1, z: 1 };
+           //rotation = { x: 0, y: Math.PI / 2, z: 0 };
+           //break;
+
+           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+           rotation = { x: 0, y: Math.PI, z: 0 };
+           break;
+
+        case "Back Side":
+          //position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+         // scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+         // rotation = { x: 0, y: Math.PI, z: 0 };
+         // break;
+
+         position = { x: -550, y: 0, z: 4 };
+         scale = { x: 0.84, y: 1, z: 1 };
+         rotation = { x: 0, y: Math.PI / 2, z: 0 };
+         break;
       }
-    });
 
-    _currentWall = null; // Clear the reference to indicate no wall is loaded
-  }
-
-  // Load new wall based on the user's selection
-  try {
-    switch (event.target.value) {
-      case "_solidAluminiumWalls":
-        _currentWall = await loadAluminumWall(scene, object);
-        
-        break;
-      case "_louvredWalls":
-        _currentWall = await loadStaticLouvredWalls(scene, object);
-        break;
-      case "_retractingLouvredWalls":
-        _currentWall = await loadRetractingLouvredWalls(scene, object);
-        break;
-      default:
-        _currentWall = null; // In case of default or empty selection
-        break;
-    }
-  } catch (error) {
-    console.error("Error loading wall: ", error);
-  }
-});
-
-
-
-document.getElementById("_victorianStyle").addEventListener("change", (event) => {
-  if (event.target.value === "_victorian") {
-    loadVictorianLamp(scene, object);
-  }
-});
-
-
-document.getElementById("_lightToggleButton").addEventListener("click", () => {
-  if (object) {
-    loadLightLamp(scene, object);
-  }
-});
-
-
-document.getElementById("_doorFeatureSelect").addEventListener("change", async (event) => {
-  // Remove current sliding glass door if already loaded
-  if (_slidingGlassDoors) {
-    scene.remove(_slidingGlassDoors);
-    _slidingGlassDoors.traverse((node) => {
-      if (node.isMesh) {
-        node.geometry.dispose();
-        node.material.dispose();
+      try {
+        const wallGroup = await loadAluminumWall(scene, position, scale, rotation);
+        console.log(`Loaded aluminum wall for ${sideName}`);
+      } catch (error) {
+        console.error("Error loading aluminum wall:", error);
       }
-    });
-    _slidingGlassDoors = null;
-  }
+    }
 
-  // Remove current pull-down blinds if already loaded
-  if (_pullDownBlinds) {
-    scene.remove(_pullDownBlinds);
-    _pullDownBlinds.traverse((node) => {
-      if (node.isMesh) {
-        node.geometry.dispose();
-        node.material.dispose();
+
+    if (selectElement.value === "_openingLouvers") {
+      let position, scale, rotation;
+
+      switch (sideName) {
+        case "Side 1":
+          position = { x: 4, y: 0, z: 4 };
+          scale = { x: 1.01, y: 1, z: 1 };
+          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
+          break;
+
+        case "Side 2":
+           //position = { x: -550, y: 0, z: 4 };
+           //scale = { x: 0.84, y: 1, z: 1 };
+           //rotation = { x: 0, y: Math.PI / 2, z: 0 };
+           //break;
+
+           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+           rotation = { x: 0, y: Math.PI, z: 0 };
+           break;
+
+        case "Back Side":
+          //position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+         // scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+         // rotation = { x: 0, y: Math.PI, z: 0 };
+         // break;
+
+         position = { x: -550, y: 0, z: 4 };
+         scale = { x: 0.84, y: 1, z: 1 };
+         rotation = { x: 0, y: Math.PI / 2, z: 0 };
+         break;
       }
-    });
-    _pullDownBlinds = null;
-  }
 
-  // Load new feature based on the user's selection
-  if (event.target.value === "_slidingGlassDoors") {
-    try {
-      _slidingGlassDoors = await loadGlassDoor(scene, object);
-    } catch (error) {
-      console.error("Error loading sliding glass doors: ", error);
+      try {
+        const wallGroup = await loadRetractingLouvredWalls(scene, position, scale, rotation);
+        console.log(`Loaded Retracting louvred wall for ${sideName}`);
+      } catch (error) {
+        console.error("Error loading louvred wall:", error);
+      }
     }
-  } else if (event.target.value === "_pullDownBlinds") {
-    try {
-      _pullDownBlinds = await loadPullDownBlinds(scene, object);
-    } catch (error) {
-      console.error("Error loading pull-down blinds: ", error);
+
+    if (selectElement.value === "_fixedLouvers") {
+      let position, scale, rotation;
+
+      switch (sideName) {
+        case "Side 1":
+          position = { x: 4, y: 0, z: 4 };
+          scale = { x: 1.01, y: 1, z: 1 };
+          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
+          break;
+
+        case "Side 2":
+
+           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+           rotation = { x: 0, y: Math.PI, z: 0 };
+           break;
+
+        case "Back Side":
+
+         position = { x: -550, y: 0, z: 4 };
+         scale = { x: 0.84, y: 1, z: 1 };
+         rotation = { x: 0, y: Math.PI / 2, z: 0 };
+         break;
+      }
+
+      try {
+        const wallGroup = await loadStaticLouvredWalls(scene, position, scale, rotation);
+        console.log(`Loaded Static louvred wall for ${sideName}`);
+      } catch (error) {
+        console.error("Error loading Static wall:", error);
+      }
     }
-  }
-});
+
+    if (selectElement.value === "_glassWalls") {
+      let position, scale, rotation;
+
+      switch (sideName) {
+
+        case "Side 1":
+          position = { x: 4, y: 0, z: 4 };
+          scale = { x: 1.01, y: 1, z: 1 };
+          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
+          break;
+
+        case "Side 2":
+           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+           rotation = { x: 0, y: Math.PI, z: 0 };
+           break;
+
+        case "Back Side":
+
+         position = { x: -550, y: 0, z: 4 };
+         scale = { x: 0.84, y: 1, z: 1 };
+         rotation = { x: 0, y: Math.PI / 2, z: 0 };
+         break;
+      }
+
+      try {
+        const wallGroup = await loadGlassWalls(scene, position, scale, rotation);
+        console.log(`Loaded Glass wall for ${sideName}`);
+      } catch (error) {
+        console.error("Error loading Glass wall:", error);
+      }
+    }
+
+    if (selectElement.value === "_blinds") {
+      let position, scale, rotation;
+
+      switch (sideName) {
+        case "Side 1":
+          position = { x: 4, y: 0, z: 4 };
+          scale = { x: 1.01, y: 1, z: 1 };
+          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
+          break;
+
+        case "Side 2":
+           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
+           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
+           rotation = { x: 0, y: Math.PI, z: 0 };
+           break;
+
+        case "Back Side":
+
+         position = { x: -550, y: 0, z: 4 };
+         scale = { x: 0.84, y: 1, z: 1 };
+         rotation = { x: 0, y: Math.PI / 2, z: 0 };
+         break;
+      }
+
+      try {
+        const wallGroup = await loadBlinds(scene, position, scale, rotation);
+        console.log(`Loaded Glass wall for ${sideName}`);
+      } catch (error) {
+        console.error("Error loading Glass wall:", error);
+      }
+    }
+  });
+}
+
+document.eg
+
+
+
+// Add event listeners for side selections
+handleSideSelection(side1Select, "Side 1");
+handleSideSelection(side2Select, "Side 2");
+handleSideSelection(backsideSelect, "Back Side");
+
+
 
 
 
 // Studio lighting setup
 const keyLight = new THREE.DirectionalLight(0xFFD580, 1.2); // Warm yellow color for sunlight
-keyLight.position.set(50, 100, 50); // Position the sun at an angle for realistic lighting
+keyLight.position.set(20, 100, 50); // Position the sun at an angle for realistic lighting
 keyLight.castShadow = true; // Allow the light to cast shadows
 scene.add(keyLight);
 
@@ -445,26 +711,14 @@ backLight.position.set(-30, 50, -30); // Positioned to highlight the back of the
 backLight.castShadow = false; // No shadows from back light to keep it subtle
 scene.add(backLight);
 
-// Add a more intense ambient light to improve visibility
-const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Increased intensity to brighten the entire scene
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Adjust intensity as needed
 scene.add(ambientLight);
-
-// Function to add features to the scene
-function addFeatureToScene(feature) {
-  feature.traverse((node) => {
-    if (node.isMesh) {
-      node.castShadow = true;
-      node.receiveShadow = true;
-    }
-  });
-  scene.add(feature);
-}
 
 // Render the scene
 function animate() {
-  requestAnimationFrame(animate);
-  controls.update(); // Smooth camera movements
-  renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+    controls.update(); // Smooth camera movements
+    renderer.render(scene, camera);
 }
 
 // Start the 3D rendering

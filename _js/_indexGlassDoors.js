@@ -3,66 +3,78 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
 
-export function loadGlassDoor(scene, object) {
-  const wallLoader = new GLTFLoader();
+function updateModel(scene, _slidingGlassDoor, _length, _width){
+
+    const _newGlassLength = _length;
+    const _newGlassWidth = _width;
+
+
+    _slidingGlassDoor.position.set( _newGlassLength, _newGlassWidth);
+
+    scene.add(_slidingGlassDoor);
+
+}
 
 
 
-  // Return a promise to ensure the loaded object is accessible
-  return new Promise((resolve, reject) => {
-    wallLoader.load(
-      "_models/_features/_door/_slidingGlassDoor.gltf",
-      (gltf) => {
-        const _slidingGlassDoor = gltf.scene;
+export function loadGlassDoor(scene, _length, _width) {
+    const wallLoader = new GLTFLoader();
 
-        // Create the walls and group them together
-        const wallGroup = new THREE.Group();
+    return new Promise((resolve, reject) => {
+        wallLoader.load(
+            "_models/_features/_door/_glassDoor.gltf",
+            (gltf) => {
+                const _slidingGlassDoor = gltf.scene;
+                const _wallGroup = new THREE.Group();
 
-        // Apply materials and shadows
-        _slidingGlassDoor.traverse((node) => {
-          if (node.isMesh) {
-            node.material = new THREE.MeshStandardMaterial({
-            
-                color: 0xffffff,           // Set the base color to white
-                roughness: 0.05,           // Reduce roughness to make it even smoother
-                metalness: 0.3,            // Increase metalness slightly for more reflection
-                transparent: true,         // Enable transparency
-                opacity: 0.3,              // Reduce opacity to make it look more transparent (lower values are more transparent)
-                side: THREE.DoubleSide,    // Render both sides to ensure it looks correct regardless of viewing angle
-                depthWrite: true,          // Write depth for accurate overlapping of other transparent elements
-                depthTest: true,           // Enable depth testing for proper scene layering
-                envMapIntensity: 0.7       // Add some environmental reflection to make it look like real glass
-            });
-            node.castShadow = true;
-            node.receiveShadow = true;
-          }
-        });
+                // Apply materials and shadows to give it a realistic glass effect
+                _slidingGlassDoor.traverse((node) => {
+                    if (node.isMesh) {
+                        node.material = new THREE.MeshStandardMaterial({
+                            color: 0xffffff,        // Glass-like base color
+                            roughness: 0.05,       // Smooth surface
+                            metalness: 1,        // Slight metallic shine
+                            transparent: true,     // Enable transparency
+                            opacity: 0.3,          // Adjust transparency level
+                            side: THREE.DoubleSide,// Render both sides
+                            depthWrite: true,      // Accurate overlapping
+                            depthTest: true,       // Ensure depth testing for proper layering
+                        });
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
 
-        // Position wall at side B
-        const _glassDoor = _slidingGlassDoor.clone();
-        _glassDoor.scale.set(1.04, 1.04, 1);
-        _glassDoor.position.set(5, 0, 4);
-        _glassDoor.rotation.y = Math.PI / 1;
-        wallGroup.add(_glassDoor);
 
-        // Position wall at side D
-        //const wallD = _solidAluminiumWalls.clone();
-        //wallD.scale.set(0.8, 1, 1);
-        //wallD.position.set(-550, 0, 4);
-        //wallD.rotation.y = Math.PI / 2;
-        //wallGroup.add(wallD);
+                const _newLength = _length;
+                const _newWidth = _width;
 
-        // Add the group to the scene
-        scene.add(wallGroup);
+                const _testing = _newLength + _newWidth;
 
-        // Return the group so it can be tracked
-        resolve(wallGroup);
-      },
-      undefined,
-      (error) => {
-        console.error("Error loading Sliding Glass Door: ", error);
-        reject(error);
-      }
-    );
-  });
+                console.log("Total: " , _testing);
+
+                //_slidingGlassDoor.scale.set(1,1,1);
+                // Add to the scene
+                _slidingGlassDoor.rotation.y = Math.PI / 0.5;
+                _wallGroup.add(_slidingGlassDoor);
+                
+
+
+                if (object) {
+                    scene.remove(object);
+                  }
+
+                //updateModel(scene, _slidingGlassDoor, _newLength, _newWidth);
+                 scene.add(_wallGroup);
+
+                // Resolve with the loaded glass door object
+                 resolve(_wallGroup);
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading Sliding Glass Door: ", error);
+                reject(error);
+            }
+        );
+    });
 }

@@ -3,7 +3,7 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
 // Aluminum Wall Module
-export function loadRetractingLouvredWalls(scene, object) {
+export function loadRetractingLouvredWalls(scene, position, scale, rotation) {
   const wallLoader = new GLTFLoader();
 
   // Return a promise to ensure the loaded object is accessible
@@ -33,19 +33,11 @@ export function loadRetractingLouvredWalls(scene, object) {
           }
         });
 
-        // Position wall at side B
-        const wallB = _retractingLouvredWalls.clone();
-        wallB.scale.set(0.8, 1, 1);
-        wallB.position.set(55, 0, 4);
-        wallB.rotation.y = Math.PI / 2;
-        wallGroup.add(wallB);
+        _retractingLouvredWalls.position.set(position.x, position.y, position.z);
+        _retractingLouvredWalls.scale.set(scale.x, scale.y, scale.z);
+        _retractingLouvredWalls.rotation.set(rotation.x, rotation.y, rotation.z);
 
-        // Position wall at side D
-        const wallD = _retractingLouvredWalls.clone();
-        wallD.scale.set(0.8, 1, 1);
-        wallD.position.set(-550, 0, 4);
-        wallD.rotation.y = Math.PI / 2;
-        wallGroup.add(wallD);
+        wallGroup.add(_retractingLouvredWalls);
 
         // Add the group to the scene
         scene.add(wallGroup);

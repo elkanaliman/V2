@@ -3,10 +3,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
 // Aluminum Wall Module
-export function loadAluminumWall(scene, object) {
+export function loadAluminumWall(scene, position, scale, rotation) {
   const wallLoader = new GLTFLoader();
-
-  //const _aluminumTexture = textureLoader.load('models/_features/_textures/_door/_glassWindowMetallic.jpg');
 
   // Return a promise to ensure the loaded object is accessible
   return new Promise((resolve, reject) => {
@@ -22,14 +20,14 @@ export function loadAluminumWall(scene, object) {
         _solidAluminiumWalls.traverse((node) => {
           if (node.isMesh) {
             node.material = new THREE.MeshStandardMaterial({
-             //map: _aluminumTexture,
-              roughness: 0.7,
-              metalness: 0.8,
-              transparent: true,
-              opacity: 1,
-              side: THREE.DoubleSide,
-              depthWrite: true,
-              depthTest: true,
+             //this here is to add textures later @dev,
+              roughness: 0.7, //these are spaces for comments for future devs
+              metalness: 0.8, //
+              transparent: true, //
+              opacity: 1, //
+              side: THREE.DoubleSide, //
+              depthWrite: true, //
+              depthTest: true, //
             });
             node.castShadow = true;
             node.receiveShadow = true;
@@ -37,18 +35,18 @@ export function loadAluminumWall(scene, object) {
         });
 
         // Position wall at side B
-        const wallB = _solidAluminiumWalls.clone();
-        wallB.scale.set(0.84, 1, 1);
-        wallB.position.set(55, 0, 4);
-        wallB.rotation.y = Math.PI / 2;
-        wallGroup.add(wallB);
+       // const wallB = _solidAluminiumWalls.clone();
+        //wallB.scale.set(0.84, 1, 1);
+        //wallB.position.set(1, 0, 4);
+        //wallB.rotation.y = Math.PI / 0.5;
+        //wallGroup.add(wallB);
 
-        // Position wall at side D
-        const wallD = _solidAluminiumWalls.clone();
-        wallD.scale.set(0.84, 1, 1);
-        wallD.position.set(-550, 0, 4);
-        wallD.rotation.y = Math.PI / 2;
-        wallGroup.add(wallD);
+        _solidAluminiumWalls.position.set(position.x, position.y, position.z);
+        _solidAluminiumWalls.scale.set(scale.x, scale.y, scale.z);
+        _solidAluminiumWalls.rotation.set(rotation.x, rotation.y, rotation.z);
+
+
+        wallGroup.add(_solidAluminiumWalls);
 
         // Add the group to the scene
         scene.add(wallGroup);
@@ -64,3 +62,4 @@ export function loadAluminumWall(scene, object) {
     );
   });
 }
+

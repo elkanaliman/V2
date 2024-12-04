@@ -1,0 +1,112 @@
+/* General Reset and Styling */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #121212;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+main {
+    width: 90%;
+    max-width: 600px;
+    margin: auto;
+    background: linear-gradient(135deg, #1b1b1b, #252525, #1b1b1b);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Summary Section */
+#summarySection {
+    margin-bottom: 20px;
+}
+
+#summarySection h2 {
+    font-size: 1.3em;
+    text-transform: uppercase;
+    color: #00e0ff;
+    margin-bottom: 15px;
+    background: linear-gradient(to right, #00e0ff, #00ff6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* User Details Form */
+#userDetailsForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#userDetailsForm h2 {
+    font-size: 1.3em;
+    text-transform: uppercase;
+    color: #00e0ff;
+    margin-bottom: 15px;
+    background: linear-gradient(to right, #00e0ff, #00ff6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#userDetailsForm label {
+    margin-bottom: 8px;
+    font-size: 1em;
+}
+
+#userDetailsForm input[type="text"],
+#userDetailsForm input[type="email"],
+#userDetailsForm input[type="tel"] {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    color: #ffffff;
+    background: #333333;
+    border: 2px solid #00e0ff;
+    border-radius: 12px;
+    box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.2);
+    outline: none;
+    transition: all 0.3s ease;
+    appearance: none;
+    position: relative;
+}
+
+/* Input Field Focus Effect */
+#userDetailsForm input:focus {
+    border-color: #00ff6a;
+    box-shadow: 0 0 15px #00ff6a;
+}
+
+/* Custom Submit Button */
+#confirmButton {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    background-color: #FFD580;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#confirmButton:hover {
+    background-color: #FFC107;
+    transform: scale(1.05);
+}
+
+#confirmButton:active {
+    transform: scale(0.95);
+}
+
+/* Responsive Styling */
+@media screen and (max-width: 768px) {
+    main {
+        width: 95%;
+    }
+}

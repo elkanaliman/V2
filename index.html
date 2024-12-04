@@ -8,110 +8,149 @@
     <link rel="stylesheet" href="_css/_index.css">
     <script defer type="module" src="_js/_index.js"></script>
 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
 
     <!-- Live Reload script for hot reloading during development -->
     <script src="http://localhost:35729/livereload.js"></script> <!-- Assuming you have a live server with LiveReload enabled -->
 </head>
 
 <body>
-    <main>
-        <div id="container3D"></div>
+    <main class="container-fluid">
 
-        <!-- Light Toggle Button -->
-        <button id="_lightToggleButton" class="light-button">
-            <i class="fas fa-lightbulb"></i>
-        </button>
+       
+        <div class="row">
+            <!-- 3D Container -->
+            <div id="container3D" class="col-12 col-lg-8 p-0"></div>
 
-        <div id="sidebar">
-            <h2>Select Canopy Type</h2>
-            <select id="_canopyTypeSelect">
-                <option value="" disabled selected>Select Canopy Type</option>
-                <option value="_wallMounted">Wall Mounted Canopy</option>
-                <option value="_freeStanding">Free Standing Canopy</option>
-            </select>
+            <!-- Sidebar -->
+            <div id="sidebar" class="col-12 col-lg-4 p-3 bg-dark text-light">
+                <h2 class="mt-4">Canopy type selection</h2>
+                <select id="_canopyTypeSelect" class="form-select mb-3">
+                    <option value="" disabled selected>Select Canopy Type</option>
+                    <option value="_wallMounted">Wall Mounted Canopy</option>
+                    <option value="_freeStanding">Free Standing Canopy</option>
+                    <option value="_freeStanding">Victorian</option>
+                </select>
 
-            <h2>Customizable Features</h2>
-            <select id="_roofFeatureSelect">
-                <option value="" disabled selected>Select Roof Type</option>
-                <option value="_louvred">Louvred Roof</option>
-                <option value="_glassRoof">Glass Roof</option>
-                <option value="_plasticRoof">Plastic Roof</option>
-                <option value="_retractingLouvredRoof">Retracting Louvred Roof</option>
-            </select>
+                <div id="roofSection" class="hidden">
+    
+                    <select id="_roofFeatureSelect" class="form-select mb-3">
+                        <option value="" disabled selected>Select Roof Type</option>
+                        <option value="_glassRoof">Glass Roof</option>
+                        <option value="_louvred">Louvred Roof</option>
+                        <option value="_plasticRoof">Polycarbonate Roof </option>
+                        <option value="_retractingLouvredRoof">Retracting Louvred Roof
+                        </option>
+                    </select>
+                </div>
 
-            <h2>Wall and Doors Features</h2>
-            <select id="_wallFeatureSelect">
-                <option value="" disabled selected>Select Wall Type</option>
-                <option value="_solidAluminiumWalls">Aluminium Wall</option>
-                <option value="_louvredWalls">Louvred Walls</option>
-                <option value="_retractingLouvredWalls">Open/Close Louvred Walls</option>
-            </select>
+                <div id="dimensionSection" class="hidden">
+                    <label for="lengthInput">Select Size </label>
+                    <input type="number" id="lengthInput" name="length" min="1" max="1" placeholder="length" class="form-control mb-3">
 
-            
-            <select id="_doorFeatureSelect">
-                <option value="" disabled selected>Select Door Type</option>
-                <option value="_slidingGlassDoors">Sliding Glass Doors (Frameless)</option>
-                <option value="_pullDownBlinds">Pull Down Blinds</option>
-            </select>
+                    
+                    <input type="number" id="widthInput" name="width" min="1" max="1" placeholder="width" class="form-control mb-3">
 
-            <h2>Aesthtic Enhancements</h2>
+                </div>
 
-            <select id="_colorFeatureSelect">
-                <option value="" disabled selected>Select Color</option>
-                <option value="_white">White</option>
-                <option value="_grey">Grey</option>
-            </select>
+                <div id="_colorSelection" class="hidden">
+                    <label for="_side1">Select color:</label>
+                    <select id="_colorFeatureSelect" class="form-select mb-3">
+                        <option value="" disabled selected>Select color</option>
+                        <option value="_white">White</option>
+                        <option value="_grey">Grey</option>
 
-            <select id="_victorianStyle">
-                <option value="" disabled selected>Select Style</option>
-                <option value="_victorian">Victorian Style</option>
-            </select>
+                    </select>
+                </div>
 
-            <!-- Price Display -->
-            <div id="priceDisplay" class="price-display">Total Price: €0</div>
+               
 
-            <!-- Get Quotation Button -->
-            <button id="quotationButton" class="scene-button">Get Quotation</button>
+                <div id="_sideSelection" class="hidden">
+                    <label for="_frontSide">Select Wall Type: </label>
+
+                    <select id="_frontSide" class="form-select mb-3">
+                        <option value="" disabled selected>Select wall 1</option>   
+                        <option value="_glassWalls"> Glass Sliding Doors </option>
+                        <option value="_fixedLouvers"> Fixed Louvred Wall </option>
+                        <option value="_openingLouvers">Opening / Tilting Louvred Wall</option>
+                        <option value="_aluminiumWall">Solid Aluminium Wall</option>
+                        <option value="_blinds">Solid Glass Wall</option>
+                        <option value="_none">No wall</option>
+                    </select>
+
+                   
+                    <select id="_side1" class="form-select mb-3">
+                        <option value="" disabled selected>Select wall 2</option>   
+                        <option value="_glassWalls"> Glass Sliding Doors </option>
+                        <option value="_fixedLouvers"> Fixed Louvred Wall </option>
+                        <option value="_openingLouvers">Opening / Tilting Louvred Wall</option>
+                        <option value="_aluminiumWall">Solid Aluminium Wall</option>
+                        <option value="_blinds">Solid Glass Wall</option>
+                        <option value="_none">No wall</option>
+                    </select>
+
+
+                    <select id="_side2" class="form-select mb-3">
+                        <option value="" disabled selected>Select wall 3</option>
+                        <option value="_glassWalls"> Glass Sliding Doors </option>
+                        <option value="_fixedLouvers"> Fixed Louvred Wall </option>
+                        <option value="_openingLouvers">Opening / Tilting Louvred Wall</option>
+                        <option value="_aluminiumWall">Solid Aluminium Wall</option>
+                        <option value="_blinds">Solid Glass Wall</option>
+                        <option value="_none">No wall</option>
+                    </select>
+
+
+                    <select id="_backside" class="form-select mb-3">
+                        <option value="" disabled selected>Select wall 4</option>
+                        <option value="_glassWalls"> Glass Sliding Doors </option>
+                        <option value="_fixedLouvers"> Fixed Louvred Wall </option>
+                        <option value="_openingLouvers">Opening / Tilting Louvred Wall</option>
+                        <option value="_aluminiumWall">Solid Aluminium Wall</option>
+                        <option value="_blinds">Solid Glass Wall</option>
+                        <option value="_none">No wall</option>
+                    </select>
+
+                    
+                </div>
+
+                <div id="_additionalFeatures" > 
+                    <label for="_frontSide">Select additional features: </label>
+                    <select id="_additionalFeatures" class="form-select mb-3">
+                        <option value="" disabled selected>Select additional features</option>
+                        <option value="_blinds">Blinds</option>
+                        <option value="_lights"> Lights </option>
+
+                    </select>
+                </div>
+
+
+                
+                <div id="_installation" > 
+                    <label for="_frontSide">Select Installation: </label>
+                    <select id="_installation" class="form-select mb-3">
+                        <option value="" disabled selected>Select Installation </option>
+                        <option value="_blinds">Yes</option>
+                        <option value="_lights"> No </option>
+
+                    </select>
+                </div>
+
+
+
+
+                <div id="_saveDetails" class="hidden mt-4">
+                    <button id="_saveDetailsBtn" class="btn btn-primary w-100" style="background-color: #CFB53B; color: #fff;">Save and Proceed</button>
+                </div>
+            </div>
         </div>
     </main>
-
-    <!-- CSS Styles for the Lights Button on the Scene -->
-    <style>
-        .scene-button {
-            position: relative;
-            margin-top: 20px;
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            background-color: #FFD580;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .scene-button:hover {
-            background-color: #FFC107;
-            transform: scale(1.05);
-        }
-
-        .scene-button:active {
-            transform: scale(0.95);
-        }
-
-        .price-display {
-            font-size: 1.5em;
-            color: #00ff6a;
-            margin-top: 15px;
-            text-align: center;
-            padding: 10px;
-            background: #333333;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.3);
-        }
-    </style>
 </body>
+
 
 </html>

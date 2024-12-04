@@ -326,39 +326,6 @@ document.getElementById("_canopyTypeSelect").addEventListener("change", (event) 
 
 
 
-document.getElementById("_colorFeatureSelect").addEventListener("change", (event) => {
-  const floorTexture = textureLoader.load('_models/_features/_textures/_assets/Wood.jpg');
-  const selectedColor = event.target.value;
-
-  if (canopyObject) {
-    canopyObject.traverse((node) => {
-      if (node.isMesh) {
-        // Set color based on the selected option
-        switch (selectedColor) {
-          case "_white":
-            
-            node.material = new THREE.MeshStandardMaterial({
-              color: 0xB6B6B6,           //         color: 0xce8141,  // Lighter brown base color
-
-        
-            });
-            break;
-          case "_grey":
-            node.material = new THREE.MeshStandardMaterial({
-              color: 0x504A4B,           // Set the base color to Nero
-              metalness: .1,            // Increase metalness slightly for more reflection
-              side: THREE.DoubleSide,    // Render both sides
-              depthWrite: true,          // Write depth for accurate overlapping
-              depthTest: true,           // Enable depth testing for proper scene layering
-        
-            });
-            break;
-           
-        }
-      }
-    });
-  }
-});
 
 
 
@@ -624,6 +591,14 @@ async function handleSideSelection(selectElement, sideName) {
       let position, scale, rotation;
 
       switch (sideName) {
+
+        case "Front side":
+
+        position = { x: 4, y: 0, z: 4 };
+        scale = { x: 1.01, y: 1, z: 1 };
+        rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
+
+        break;
 
         case "Side 1":
           position = { x: 4, y: 0, z: 4 };

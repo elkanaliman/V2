@@ -38,7 +38,7 @@ canopyTypeSelect.addEventListener('change', function () {
     if (canopyTypeSelect.value === "_wallMounted") {
       // Show only Front, Side 1, and Side 2 for wall-mounted canopies
 
-      frontSideSelect.style.display = 'block';
+    frontSideSelect.style.display = 'block';
     side1Select.style.display = 'block';
     side2Select.style.display = 'none';
     backsideSelect.style.display = 'block';
@@ -103,6 +103,7 @@ const floorMaterial = new THREE.MeshStandardMaterial({
    // map: floorTexture, // Apply the marble tiled texture
     roughness: 1, // Lower roughness for a glossy effect
     metalness: .1, // Increase metalness for a slight reflection
+    color: 0x152e45,
 });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
@@ -297,32 +298,66 @@ document.getElementById("_canopyTypeSelect").addEventListener("change", (event) 
  const _added = _pergolaLength1 + _pergolaWidth1;
  console.log('Total is', _added);
 
-   function updateModel() {
-         const _pergolaLength = parseInt(_lengthSelect.value) || 1; // Default to 1 if invalid
-         const _pergolaWidth = parseInt(_widthSelect.value) || 1; // Default to 1 if invalid
+ function updateModel() {
+  const pergolaLength = parseInt(_lengthSelect.value) || 1; // Default to 1 if no valid value is given
+  const pergolaWidth = parseInt(_widthSelect.value) || 1;   // Default to 1 if no valid value is given
 
-       // Update the canopy scale
-       if (canopyObject) {
-         canopyObject.scale.set(_pergolaLength, 1, _pergolaWidth);
-       }
+  // Update the canopy size
+  if (canopyObject) {
+    canopyObject.scale.set(pergolaLength, 1, pergolaWidth);
+  }
 
-       // Update the roof scale
-       if (_louvres) {
-         updateRoofDimensions(_louvres, _pergolaLength, _pergolaWidth);
-       }
-       if (_glassRoof) {
-         updateRoofDimensions( _glassRoof,_pergolaLength, _pergolaWidth);
-       }
-       if (_plasticRoof) {
-        updateRoofDimensions( _plasticRoof,_pergolaLength, _pergolaWidth);
-      }if (_retractingLouvredRoof) {
-        updateRoofDimensions( _retractingLouvredRoof,_pergolaLength, _pergolaWidth);
-      } 
+  // Update the roof scale
+  if (_louvres) {
+    updateRoofDimensions(_louvres, pergolaLength, pergolaWidth);
+  }
+  if (_glassRoof) {
+    updateRoofDimensions(_glassRoof, pergolaLength, pergolaWidth);
+  }
+  if (_plasticRoof) {
+    updateRoofDimensions(_plasticRoof, pergolaLength, pergolaWidth);
+  }
+  if (_retractingLouvredRoof) {
+    updateRoofDimensions(_retractingLouvredRoof, pergolaLength, pergolaWidth);
+  }
 
+  // Update wall dimensions
+  updateWallDimensions(pergolaLength, pergolaWidth);
+}
 
-       console.log(`Updated to Length: ${_pergolaLength}, Width: ${_pergolaWidth}`);
-    
-   }
+function updateWallDimensions(length, width) {
+  // Update dimensions for aluminum walls, if they exist
+  if (_aluminiumWallGroup) {
+    updateWallProperties(_aluminiumWallGroup, "Front Side", length, width);
+    updateWallProperties(_aluminiumWallGroup, "Side 1", length, width);
+    updateWallProperties(_aluminiumWallGroup, "Side 2", length, width);
+    updateWallProperties(_aluminiumWallGroup, "Back Side", length, width);
+  }
+
+  // Update dimensions for glass walls, if they exist
+  if (_glassWallsGroup) {
+    updateWallProperties(_glassWallsGroup, "Front Side", length, width);
+    updateWallProperties(_glassWallsGroup, "Side 1", length, width);
+    updateWallProperties(_glassWallsGroup, "Side 2", length, width);
+    updateWallProperties(_glassWallsGroup, "Back Side", length, width);
+  }
+
+  // Update dimensions for fixed louvres, if they exist
+  if (_fixedLouversGroup) {
+    updateWallProperties(_fixedLouversGroup, "Front Side", length, width);
+    updateWallProperties(_fixedLouversGroup, "Side 1", length, width);
+    updateWallProperties(_fixedLouversGroup, "Side 2", length, width);
+    updateWallProperties(_fixedLouversGroup, "Back Side", length, width);
+  }
+
+  // Update dimensions for opening louvres, if they exist
+  if (_openingLouversGroup) {
+    updateWallProperties(_openingLouversGroup, "Front Side", length, width);
+    updateWallProperties(_openingLouversGroup, "Side 1", length, width);
+    updateWallProperties(_openingLouversGroup, "Side 2", length, width);
+    updateWallProperties(_openingLouversGroup, "Back Side", length, width);
+  }
+}
 
 
 
@@ -351,6 +386,8 @@ function updateRoofDimensions(_featureRoof) {
   else {
     console.error('Roof object is not yet loaded or defined.');
   }
+
+
 
   scene.add(_featureRoof);
 }
@@ -466,210 +503,113 @@ document.getElementById("_roofFeatureSelect").addEventListener("change", (event)
 
 
 
-
-
+// Define variables to keep track of different walls
+let _aluminiumWallGroup = null;
+let _glassWallsGroup = null;
+let _fixedLouversGroup = null;
+let _openingLouversGroup = null;
 
 async function handleSideSelection(selectElement, sideName) {
   selectElement.addEventListener("change", async function () {
-    if (selectElement.value === "_aluminiumWall") {
-      let position, scale, rotation;
-
-      switch (sideName) {
-        case "Side 1":
-          position = { x: 4, y: 0, z: 4 };
-          scale = { x: 1.01, y: 1, z: 1 };
-          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
-          break;
-
-        case "Side 2":
-           //position = { x: -550, y: 0, z: 4 };
-           //scale = { x: 0.84, y: 1, z: 1 };
-           //rotation = { x: 0, y: Math.PI / 2, z: 0 };
-           //break;
-
-           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-           rotation = { x: 0, y: Math.PI, z: 0 };
-           break;
-
-        case "Back Side":
-          //position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-         // scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-         // rotation = { x: 0, y: Math.PI, z: 0 };
-         // break;
-
-         position = { x: -550, y: 0, z: 4 };
-         scale = { x: 0.84, y: 1, z: 1 };
-         rotation = { x: 0, y: Math.PI / 2, z: 0 };
-         break;
-      }
-
-      try {
-        const wallGroup = await loadAluminumWall(scene, position, scale, rotation);
-        console.log(`Loaded aluminum wall for ${sideName}`);
-      } catch (error) {
-        console.error("Error loading aluminum wall:", error);
-      }
-    }
+    let wallGroup = null;
 
 
-    if (selectElement.value === "_openingLouvers") {
-      let position, scale, rotation;
 
-      switch (sideName) {
-        case "Side 1":
-          position = { x: 4, y: 0, z: 4 };
-          scale = { x: 1.01, y: 1, z: 1 };
-          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
-          break;
-
-        case "Side 2":
-           //position = { x: -550, y: 0, z: 4 };
-           //scale = { x: 0.84, y: 1, z: 1 };
-           //rotation = { x: 0, y: Math.PI / 2, z: 0 };
-           //break;
-
-           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-           rotation = { x: 0, y: Math.PI, z: 0 };
-           break;
-
-        case "Back Side":
-          //position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-         // scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-         // rotation = { x: 0, y: Math.PI, z: 0 };
-         // break;
-
-         position = { x: -550, y: 0, z: 4 };
-         scale = { x: 0.84, y: 1, z: 1 };
-         rotation = { x: 0, y: Math.PI / 2, z: 0 };
-         break;
-      }
-
-      try {
-        const wallGroup = await loadRetractingLouvredWalls(scene, position, scale, rotation);
-        console.log(`Loaded Retracting louvred wall for ${sideName}`);
-      } catch (error) {
-        console.error("Error loading louvred wall:", error);
-      }
-    }
-
-    if (selectElement.value === "_fixedLouvers") {
-      let position, scale, rotation;
-
-      switch (sideName) {
-        case "Side 1":
-          position = { x: 4, y: 0, z: 4 };
-          scale = { x: 1.01, y: 1, z: 1 };
-          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
-          break;
-
-        case "Side 2":
-
-           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-           rotation = { x: 0, y: Math.PI, z: 0 };
-           break;
-
-        case "Back Side":
-
-         position = { x: -550, y: 0, z: 4 };
-         scale = { x: 0.84, y: 1, z: 1 };
-         rotation = { x: 0, y: Math.PI / 2, z: 0 };
-         break;
-      }
-
-      try {
-        const wallGroup = await loadStaticLouvredWalls(scene, position, scale, rotation);
-        console.log(`Loaded Static louvred wall for ${sideName}`);
-      } catch (error) {
-        console.error("Error loading Static wall:", error);
-      }
-    }
-
-    if (selectElement.value === "_glassWalls") {
-      let position, scale, rotation;
-
-      switch (sideName) {
-
-        case "Front side":
-
-        position = { x: 4, y: 0, z: 4 };
-        scale = { x: 1.01, y: 1, z: 1 };
-        rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
-
+    // Load the selected wall type
+    switch (selectElement.value) {
+      case "_aluminiumWall":
+        try {
+          wallGroup = await loadAluminumWall(scene);
+          _aluminiumWallGroup = wallGroup; // Store reference
+        } catch (error) {
+          console.error("Error loading aluminum wall:", error);
+        }
         break;
 
-        case "Side 1":
-          position = { x: 4, y: 0, z: 4 };
-          scale = { x: 1.01, y: 1, z: 1 };
-          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
-          break;
+      case "_glassWalls":
+        try {
+          wallGroup = await loadGlassWalls(scene);
+          _glassWallsGroup = wallGroup; // Store reference
+        } catch (error) {
+          console.error("Error loading glass wall:", error);
+        }
+        break;
 
-        case "Side 2":
-           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-           rotation = { x: 0, y: Math.PI, z: 0 };
-           break;
+      case "_fixedLouvers":
+        try {
+          wallGroup = await loadStaticLouvredWalls(scene);
+          _fixedLouversGroup = wallGroup; // Store reference
+        } catch (error) {
+          console.error("Error loading fixed louvred wall:", error);
+        }
+        break;
 
-        case "Back Side":
+      case "_openingLouvers":
+        try {
+          wallGroup = await loadRetractingLouvredWalls(scene);
+          _openingLouversGroup = wallGroup; // Store reference
+        } catch (error) {
+          console.error("Error loading opening louvred wall:", error);
+        }
+        break;
 
-         position = { x: -550, y: 0, z: 4 };
-         scale = { x: 0.84, y: 1, z: 1 };
-         rotation = { x: 0, y: Math.PI / 2, z: 0 };
-         break;
-      }
-
-      try {
-        const wallGroup = await loadGlassWalls(scene, position, scale, rotation);
-        console.log(`Loaded Glass wall for ${sideName}`);
-      } catch (error) {
-        console.error("Error loading Glass wall:", error);
-      }
+      default:
+        console.error("Unknown wall type selected: " + selectElement.value);
+        return;
     }
 
-    if (selectElement.value === "_blinds") {
-      let position, scale, rotation;
-
-      switch (sideName) {
-        case "Side 1":
-          position = { x: 4, y: 0, z: 4 };
-          scale = { x: 1.01, y: 1, z: 1 };
-          rotation = { x: 0, y: Math.PI / 0.5, z: 0 };
-          break;
-
-        case "Side 2":
-           position = { x: 0, y: 0, z: -55 };  // Adjust these values accordingly
-           scale = { x: 1.01, y: 1, z: 0.8 };     // Make the back side smaller as per your requirement
-           rotation = { x: 0, y: Math.PI, z: 0 };
-           break;
-
-        case "Back Side":
-
-         position = { x: -550, y: 0, z: 4 };
-         scale = { x: 0.84, y: 1, z: 1 };
-         rotation = { x: 0, y: Math.PI / 2, z: 0 };
-         break;
-      }
-
-      try {
-        const wallGroup = await loadBlinds(scene, position, scale, rotation);
-        console.log(`Loaded Glass wall for ${sideName}`);
-      } catch (error) {
-        console.error("Error loading Glass wall:", error);
-      }
+    // If wallGroup is loaded, add it to the scene and update properties
+    if (wallGroup) {
+      scene.add(wallGroup);
+      updateWallProperties(wallGroup, sideName, parseInt(_lengthSelect.value) || 1, parseInt(_widthSelect.value) || 1);
     }
   });
 }
 
-document.eg
+// Function to update wall properties like position, scale, and rotation
+function updateWallProperties(wallGroup, sideName, length, width) {
+  let position, scale, rotation;
 
+  switch (sideName) {
+    case "Front Side":
+      position = { x: 0, y: 0, z: length / 2 };
+      scale = { x: width, y: 1, z: 1 };
+      rotation = { x: 0, y: 0, z: 0 };
+      break;
 
+    case "Side 1":
+      position = { x: width / 2, y: 0, z: 0 };
+      scale = { x: 1, y: 1, z: length };
+      rotation = { x: 0, y: Math.PI / 2, z: 0 };
+      break;
 
-// Add event listeners for side selections
-handleSideSelection(side1Select, "Side 1");
-handleSideSelection(side2Select, "Side 2");
-handleSideSelection(backsideSelect, "Back Side");
+    case "Side 2":
+      position = { x: -width / 2, y: 0, z: 0 };
+      scale = { x: 1, y: 1, z: length };
+      rotation = { x: 0, y: -Math.PI / 2, z: 0 };
+      break;
+
+    case "Back Side":
+      position = { x: 0, y: 0, z: -length / 2 };
+      scale = { x: width, y: 1, z: 1 };
+      rotation = { x: 0, y: Math.PI, z: 0 };
+      break;
+
+    default:
+      console.error("Unknown side selected: " + sideName);
+      return;
+  }
+
+  wallGroup.position.set(position.x, position.y, position.z);
+  wallGroup.scale.set(scale.x, scale.y, scale.z);
+  wallGroup.rotation.set(rotation.x, rotation.y, rotation.z);
+}
+
+// Attach event listeners to the wall selection elements
+handleSideSelection(document.getElementById('_frontSide'), "Front Side");
+handleSideSelection(document.getElementById('_side1'), "Side 1");
+handleSideSelection(document.getElementById('_side2'), "Side 2");
+handleSideSelection(document.getElementById('_backside'), "Back Side");
 
 
 

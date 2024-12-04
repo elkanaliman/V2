@@ -3,7 +3,12 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
 // Aluminum Wall Module
-export function loadAluminumWall(scene, position, scale, rotation) {
+export function loadAluminumWall(
+  scene,
+  position = { x: 0, y: 0, z: 0 }, // Default position if not provided
+  scale = { x: 1, y: 1, z: 1 }, // Default scale if not provided
+  rotation = { x: 0, y: 0, z: 0 } // Default rotation if not provided
+) {
   const wallLoader = new GLTFLoader();
 
   // Return a promise to ensure the loaded object is accessible
@@ -20,32 +25,43 @@ export function loadAluminumWall(scene, position, scale, rotation) {
         _solidAluminiumWalls.traverse((node) => {
           if (node.isMesh) {
             node.material = new THREE.MeshStandardMaterial({
-             //this here is to add textures later @dev,
-              roughness: 0.7, //these are spaces for comments for future devs
-              metalness: 0.8, //
-              transparent: true, //
-              opacity: 1, //
-              side: THREE.DoubleSide, //
-              depthWrite: true, //
-              depthTest: true, //
+              // Material properties
+              roughness: 0.7,
+              metalness: 0.8,
+              transparent: true,
+              opacity: 1,
+              side: THREE.DoubleSide,
+              depthWrite: true,
+              depthTest: true,
             });
             node.castShadow = true;
             node.receiveShadow = true;
           }
         });
 
-        // Position wall at side B
-       // const wallB = _solidAluminiumWalls.clone();
-        //wallB.scale.set(0.84, 1, 1);
-        //wallB.position.set(1, 0, 4);
-        //wallB.rotation.y = Math.PI / 0.5;
-        //wallGroup.add(wallB);
+        // Position, scale, and rotate the wall using the provided values
+        if (position && position.x !== undefined && position.y !== undefined && position.z !== undefined) {
+          _solidAluminiumWalls.position.set(position.x, position.y, position.z);
+        } else {
+          console.warn("Position object is not properly defined, using default values.");
+          _solidAluminiumWalls.position.set(0, 0, 0);
+        }
 
-        _solidAluminiumWalls.position.set(position.x, position.y, position.z);
-        _solidAluminiumWalls.scale.set(scale.x, scale.y, scale.z);
-        _solidAluminiumWalls.rotation.set(rotation.x, rotation.y, rotation.z);
+        if (scale && scale.x !== undefined && scale.y !== undefined && scale.z !== undefined) {
+          _solidAluminiumWalls.scale.set(scale.x, scale.y, scale.z);
+        } else {
+          console.warn("Scale object is not properly defined, using default values.");
+          _solidAluminiumWalls.scale.set(1, 1, 1);
+        }
 
+        if (rotation && rotation.x !== undefined && rotation.y !== undefined && rotation.z !== undefined) {
+          _solidAluminiumWalls.rotation.set(rotation.x, rotation.y, rotation.z);
+        } else {
+          console.warn("Rotation object is not properly defined, using default values.");
+          _solidAluminiumWalls.rotation.set(0, 0, 0);
+        }
 
+        // Add the wall to the wall group
         wallGroup.add(_solidAluminiumWalls);
 
         // Add the group to the scene
@@ -62,4 +78,3 @@ export function loadAluminumWall(scene, position, scale, rotation) {
     );
   });
 }
-

@@ -1,0 +1,46 @@
+
+  .custom-btn {
+    background: linear-gradient(135deg, #d9dad7, #8fa4c0); /* Gradient from light grey to light blue */
+    color: #ffffff; /* White text for better contrast */
+    border: none; /* Remove border to make gradient prominent */
+    border-radius: 8px; /* Rounded corners for a modern look */
+    transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out, transform 0.1s ease-in-out; /* Smooth transitions */
+  }
+
+  .custom-btn:hover {
+    background: linear-gradient(135deg, #8fa4c0, #333333); /* Darker gradient on hover */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Add shadow for hover effect */
+    transform: translateY(-2px); /* Slight movement upwards to give a lifting effect */
+  }
+
+  .custom-btn:active {
+    background: linear-gradient(135deg, #6c757d, #333333); /* Darker gradient for active state */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Reduce shadow to simulate button press */
+    transform: translateY(1px); /* Slight downward movement to simulate pressing */
+  }
+
+
+  .custom-save-btn {
+    background-color: #CFB53B; /* Old gold color */
+    color: #ffffff; /* White text */
+    border: none; /* Remove border for a clean look */
+    border-radius: 8px; /* Slight rounding of corners for a modern look */
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, transform 0.1s ease-in-out; /* Smooth transition effects */
+  }
+
+  .custom-save-btn:hover {
+    background-color: #b49b30; /* Darker shade of old gold for hover effect */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Slight shadow for a lifting effect */
+    transform: translateY(-2px); /* Small upward movement to simulate lift */
+  }
+
+  .custom-save-btn:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 10px rgba(207, 181, 59, 0.5); /* Golden glow for focus */
+  }
+
+  .custom-save-btn:active {
+    background-color: #a48428; /* Darker shade for active/pressed state */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Reduce shadow for pressed look */
+    transform: translateY(1px); /* Slight downward movement to simulate button press */
+  }

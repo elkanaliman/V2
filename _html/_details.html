@@ -3,34 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Details</title>
-    
-    <link rel="stylesheet" href="../_css/_details.css">
+    <title>Quote Summary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f6; /* Light greyish background */
+            color: #333; /* Text color */
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: #fff; /* White card-like container */
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .quote-header h1 {
+            color: #aa6c39; /* Old gold color */
+        }
+        .quote-header p {
+            margin: 0;
+            color: #777; /* Subtle grey for details */
+        }
+        .details-section h4, .user-details-section h4 {
+            margin-bottom: 10px;
+            color: #005f73; /* Light blue for headers */
+        }
+        .details-section p, .user-details-section p {
+            margin: 5px 0;
+            color: #666; /* Subtle grey for text details */
+        }
+        .form-label {
+            color: #555; /* Slightly darker grey for form labels */
+        }
+        .custom-action-btn {
+            background: linear-gradient(135deg, #d9dad7, #8fa4c0); /* Gradient from light grey to light blue */
+            color: #ffffff; /* White text for contrast */
+            border: 2px solid #CFB53B; /* Old gold border for theme alignment */
+            border-radius: 8px; /* Rounded corners */
+            padding: 12px 20px; /* Comfortable padding */
+            font-size: 16px; /* Readable font size */
+            font-weight: bold; /* Bold text for emphasis */
+            cursor: pointer; /* Pointer on hover */
+            text-transform: uppercase; /* Uppercase text for a clean look */
+            transition: all 0.3s ease; /* Smooth transitions for hover and active states */
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+        }
+        .custom-action-btn:hover {
+            background: linear-gradient(135deg, #8fa4c0, #CFB53B); /* Reverse gradient for hover effect */
+            color: #ffffff; /* Maintain white text */
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3); /* Slightly enhanced shadow */
+            transform: translateY(-2px); /* Lift effect */
+        }
+        .custom-action-btn:active {
+            background: #6c757d; /* Darker grey for active state */
+            border-color: #8fa4c0; /* Light blue border for focus */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Subtle pressed look */
+            transform: translateY(2px); /* Button press effect */
+        }
+        .separator {
+            border-top: 2px solid #d9dad7; /* Subtle grey line */
+            margin: 40px 0; /* Space above and below */
+        }
+        #totalCostContainer {
+  display: block; /* Default to visible */
+  transition: opacity 0.3s ease, visibility 0s ease 0.3s; /* Smooth transition for hiding */
+}
+
+#totalCostContainer.hidden {
+  display: none; /* Will hide when the 'hidden' class is added */
+  opacity: 0;
+  visibility: hidden;
+}
+    </style>
 </head>
 <body>
-    <main>
-        <div id="summarySection">
-            <h2>Selected Configuration Summary</h2>
-            <ul id="selectedOptionsList"></ul>
+    <div class="container">
+
+        <div class="details-section">
+            <h4>Selected Configurations:</h4>
+            <p><strong>Canopy Type: Wall Mounted Canopy</strong> <span id="canopyTypes"></span></p>
+            <p><strong>Roof Feature: Slanted glass roof</strong> <span id="roofFeature"></span></p>
+            <p><strong>Walls:</strong></p>
+            <ul>
+                <li><strong>Wall 1: Glass wall</strong> <span id="wall1"></span></li>
+                <li><strong>Wall 2: Aluminum wall</strong> <span id="wall2"></span></li>
+                <li><strong>Wall 3: Sliding glass</strong> <span id="wall3"></span></li>
+            </ul>
+
+
         </div>
-        <form id="userDetailsForm">
-            <h2>Enter Your Details</h2>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" required>
-            
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" required>
 
-            <button type="button" id="confirmButton" class="scene-button">Confirm and Send</button>
-        </form>
-    </main>
+        <!-- Separator -->
+        <div class="separator"></div>
 
-    <script src="../_js/_details.js"></script>
+        <div class="user-details-section">
+            <div style="background: red; color: white; padding: 10px; text-align: center; font-weight: bold;">
+                🚧 This is a Demo Version - No Real Submission 🚧
+            </div>
+            <h4>Enter Your Details:</h4>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                We collect your information to provide an accurate quote, prioritize your request based on your timeframe, and make cost-saving suggestions if needed. Your data will not be shared with third parties.
+            </p>
+            <form id="userDetailsForm">
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" id="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea id="address" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" pattern="[0-9]{7,15}" title="Phone number must be 7 to 15 digits" required>
+
+                </div>
+                <div class="mb-3">
+                    <label for="timeframe" class="form-label">Timeframe to Purchase</label>
+                    <select id="timeframe" class="form-select" required>
+                        <option value="" disabled selected>Select Timeframe</option>
+                        <option value="Immediate">Immediate</option>
+                        <option value="1-3 Months">1-3 Months</option>
+                        <option value="3-6 Months">3-6 Months</option>
+                        <option value="6+ Months">6+ Months</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="budget" class="form-label" max>Budget (£)</label>
+                    <input type="number" id="budget" class="form-control" required>
+                </div>
+                <a href="confirmation.html" >
+                    <button type="button" class="custom-action-btn w-100">Submit Details</button>
+                </a>
+            </form>
+        </div>
+
+        <div class="quote-header text-center">
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img 
+
+                    style="
+                       max-width: 100%; 
+                       height: auto; 
+                       max-height: 80px; 
+                       object-fit: contain;
+                       background-color: transparent; /* Ensure background is transparent */
+                       mix-blend-mode: multiply; /* Removes the white background visually */
+                    " 
+                />
+            </div>
+            <p>8, Willow Park, Langley Park, Durham DH7 9FF</p>
+            <p>Email: info@alfresko.co.uk | Phone: 07743896460</p>
+            <p style="font-size: 0.9em; color: #777; margin-top: 10px;">
+                Software Version: <strong>2.0.23</strong>
+            </p>
+        </div>
+    </div>
+    <script defer type="module" src="../_js/_index.js"></script>
 </body>
 </html>

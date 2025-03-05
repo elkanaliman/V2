@@ -1384,9 +1384,9 @@ let previousPos = {
 }
 
 
-window.addEventListener("contextmenu", (event) => {
+/*window.addEventListener("contextmenu", (event) => {
   event.preventDefault(); // Prevent context menu from appearing
-});
+});*/
 
 
 window.addEventListener("mousedown", (event) => {
@@ -1469,36 +1469,42 @@ window.addEventListener("mouseup", (event) => {
     isRotating = false;
   }
 });
-
-
 window.addEventListener("touchstart", (event) => {
-  event.preventDefault(); // Prevent default touch behaviors like scrolling
+  event.preventDefault(); // Prevent default touch behaviors
   
-  const touch = event.touches[0];
-  
-  // Get normalized touch coordinates
-  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  // Track initial touches
+  initialTouches = event.touches;
   
   if (event.touches.length === 1) {
-    // Single touch = drag (like left click)
+    // Single touch = drag
+    const touch = event.touches[0];
+    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+    
     isDragging = true;
     previousPos = {
       x: touch.clientX,
       y: touch.clientY
     };
   } else if (event.touches.length === 2) {
-    // Two finger touch = rotation (like right click)
-    // Get midpoint between the two touches
+    // Two-finger interactions
+    const touch1 = event.touches[0];
     const touch2 = event.touches[1];
-    const midX = (touch.clientX + touch2.clientX) / 2;
-    const midY = (touch.clientY + touch2.clientY) / 2;
     
-    // Update normalized coordinates for the midpoint
+    // Calculate initial distance between touches for zoom
+    initialDistance = Math.hypot(
+      touch2.clientX - touch1.clientX, 
+      touch2.clientY - touch1.clientY
+    );
+    
+    // Calculate midpoint for rotation
+    const midX = (touch1.clientX + touch2.clientX) / 2;
+    const midY = (touch1.clientY + touch2.clientY) / 2;
+    
     mouse.x = (midX / window.innerWidth) * 2 - 1;
     mouse.y = -(midY / window.innerHeight) * 2 + 1;
     
-    // Cast ray to find rotation center
+    // Set rotation center
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
     
@@ -1507,11 +1513,7 @@ window.addEventListener("touchstart", (event) => {
     }
     
     isRotating = true;
-    isDragging = false; // Ensure we're not dragging and rotating simultaneously
-    previousPos = {
-      x: midX,
-      y: midY
-    };
+    isDragging = false;
   }
 });
 
@@ -1519,8 +1521,8 @@ window.addEventListener("touchmove", (event) => {
   event.preventDefault();
   
   if (event.touches.length === 1 && isDragging) {
+    // Single finger drag
     const touch = event.touches[0];
-    
     const deltaMove = {
       x: touch.clientX - previousPos.x,
       y: touch.clientY - previousPos.y
@@ -1535,10 +1537,27 @@ window.addEventListener("touchmove", (event) => {
       x: touch.clientX,
       y: touch.clientY
     };
-  } else if (event.touches.length === 2 && isRotating) {
-    // Calculate midpoint for two-finger rotation
+  } else if (event.touches.length === 2) {
     const touch1 = event.touches[0];
     const touch2 = event.touches[1];
+    
+    // Pinch to Zoom
+    const touchDistance = Math.hypot(
+      touch2.clientX - touch1.clientX, 
+      touch2.clientY - touch1.clientY
+    );
+    
+    const zoomFactor = touchDistance / initialDistance;
+    
+    // Adjust camera distance from rotation center
+    const zoomSpeed = 0.1;
+    const currentDirection = camera.position.clone().sub(rotationCenter).normalize();
+    const cameraCenterDistance = camera.position.distanceTo(rotationCenter);
+    
+    const newDistance = cameraCenterDistance * (1 / zoomFactor);
+    camera.position.copy(rotationCenter.clone().add(currentDirection.multiplyScalar(newDistance)));
+    
+    // Rotation
     const midX = (touch1.clientX + touch2.clientX) / 2;
     const midY = (touch1.clientY + touch2.clientY) / 2;
     
@@ -1547,12 +1566,28 @@ window.addEventListener("touchmove", (event) => {
       y: midY - previousPos.y
     };
     
-    handleRotation(deltaRotate);
+    const rotationSpeed = 0.01;
+    
+    // Horizontal rotation
+    camera.position.sub(rotationCenter);
+    camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), -deltaRotate.x * rotationSpeed);
+    camera.position.add(rotationCenter);
+    
+    // Vertical rotation
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    camera.position.sub(rotationCenter);
+    camera.position.applyAxisAngle(right, -deltaRotate.y * rotationSpeed);
+    camera.position.add(rotationCenter);
+    
+    camera.lookAt(rotationCenter);
     
     previousPos = {
       x: midX,
       y: midY
     };
+    
+    // Update initial distance for next move
+    initialDistance = touchDistance;
   }
 });
 
@@ -1562,8 +1597,7 @@ window.addEventListener("touchend", (event) => {
     isDragging = false;
     isRotating = false;
   } else if (event.touches.length === 1) {
-    // If we were rotating with 2 fingers and one was lifted,
-    // switch to dragging mode
+    // Switch to dragging if one finger remains
     if (isRotating) {
       isRotating = false;
       isDragging = true;
@@ -1575,7 +1609,6 @@ window.addEventListener("touchend", (event) => {
     }
   }
 });
-
 
 
 
